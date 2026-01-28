@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reckoning — Workflow Orchestrator for Recon, Monitoring, and Ops</title>
+  <meta name="description" content="Reckoning is a modular workflow orchestrator for offensive operations, reconnaissance, monitoring, and any CLI-driven tooling. Create, run, and share repeatable workflows." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+
+        :root {
+            /* myBB Dark Theme Colors */
+            --primary: #1c1e22;
+            --secondary: #272b30;
+            --tertiary: #3a3f44;
+            --accent: #4a86e8;
+            --accent-hover: #3a76d8;
+            --text: #c8c8c8;
+            --text-muted: #8a8a8a;
+            --success: #5cb85c;
+            --warning: #f0ad4e;
+            --danger: #d9534f;
+            --info: #5bc0de;
+            --border: #1c1e22;
+            --border-light: #32383e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--secondary);
+            border-bottom: 3px solid var(--accent);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* Logo image styling */
+        .logo-img {
+            height: 40px; /* Adjust this to match your logo's aspect ratio */
+            width: auto;
+            max-height: 40px;
+        }
+        
+        /* For responsive design */
+        @media (max-width: 768px) {
+            .logo-img {
+                height: 30px;
+            }
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: var(--tertiary);
+            color: white;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--tertiary);
+            border-radius: 6px 6px 0 0;
+        }
+        
+        .card-title {
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(74, 134, 232, 0.3);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--tertiary);
+            color: var(--text);
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            background: var(--primary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 134, 232, 0.2);
+        }
+        
+        .form-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background: rgba(91, 192, 222, 0.1);
+            border-color: var(--info);
+            color: var(--info);
+        }
+        
+        .alert-success {
+            background: rgba(92, 184, 92, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .alert-warning {
+            background: rgba(240, 173, 78, 0.1);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+        
+        .alert-danger {
+            background: rgba(217, 83, 79, 0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+        }
+        
+        .status-running {
+            background: rgba(91, 192, 222, 0.2);
+            color: var(--info);
+        }
+        
+        .status-completed {
+            background: rgba(92, 184, 92, 0.2);
+            color: var(--success);
+        }
+        
+        .status-failed {
+            background: rgba(217, 83, 79, 0.2);
+            color: var(--danger);
+        }
+        
+        /* Tool chain visualization */
+        .tool-chain {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+        
+        .tool-chain::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-light);
+            z-index: 1;
+        }
+        
+        .tool-node {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+                
+        .tool-content {
+            flex: 1;
+        }
+        
+        .tool-connector {
+            position: absolute;
+            left: 30px;
+            top: 60px;
+            width: 2px;
+            height: 20px;
+            background: var(--border-light);
+        }
+        
+        /* Execution progress */
+        .execution-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: var(--primary);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--info));
+            transition: width 0.5s ease;
+        }
+        
+        /* Code blocks */
+        .code-block {
+            background: var(--primary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background: var(--tertiary);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 2px solid var(--border-light);
+        }
+        
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Utility classes */
+        .d-flex {
+            display: flex;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .align-center {
+            align-items: center;
+        }
+        
+        .gap-10 {
+            gap: 10px;
+        }
+        
+        .gap-20 {
+            gap: 20px;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .tool-node {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .tool-chain::before {
+                display: none;
+            }
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--secondary);
+            border-radius: 8px;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+    
+
+        /* Landing-page additions */
+        .hero {
+            padding: 60px 0 30px;
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            align-items: center;
+        }
+        @media (max-width: 900px){
+            .hero-grid{grid-template-columns:1fr;}
+        }
+        .badge{
+            display:inline-flex;
+            gap:8px;
+            align-items:center;
+            padding:6px 10px;
+            border:1px solid var(--border-light);
+            background: rgba(255,255,255,0.02);
+            border-radius: 999px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .section{
+            padding: 30px 0;
+        }
+        .section h2{
+            margin:0 0 12px;
+            color: var(--accent);
+        }
+        .muted{
+            color: var(--text-muted);
+        }
+        .grid-3{
+            display:grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 1000px){
+            .grid-3{grid-template-columns: 1fr;}
+        }
+        .codeblock{
+            background: var(--secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.95rem;
+            overflow:auto;
+            white-space: pre;
+        }
+        .kpi{
+            display:flex; gap:12px; align-items:flex-start;
+        }
+        .kpi i{ color: var(--accent); margin-top:3px; }
+        .footer{
+            border-top: 1px solid var(--border-light);
+            padding: 24px 0;
+            margin-top: 24px;
+            color: var(--text-muted);
+        }
+        .mini-nav .nav-link .fa-solid, .mini-nav .nav-link .fa, .mini-nav .nav-link i{
+            margin-right: 8px;
+        }
+        .mini-nav .nav-link{
+            padding: 10px 12px;
+        }
+        .logo-img{
+            height: 34px;
+            width: auto;
+        }
+
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-content">
+      <div class="logo">
+        <img src="./img/logo.png" alt="Reckoning" class="logo-img">
+      </div>
+      <nav class="nav-menu mini-nav" aria-label="Primary">
+        <a class="nav-link" href="#overview"><i class="fas fa-circle-info"></i> Overview</a>
+        <a class="nav-link" href="#features"><i class="fas fa-bolt"></i> Features</a>
+        <a class="nav-link" href="#workflows"><i class="fas fa-diagram-project"></i> Workflows</a>
+        <a class="nav-link" href="#install"><i class="fas fa-terminal"></i> Install</a>
+        <a class="nav-link" href="#security"><i class="fas fa-shield-halved"></i> Security</a>
+      </nav>
+      <div class="d-flex align-center gap-10">
+        <a class="btn btn-primary" href="https://github.com/rf-peixoto/reckoning" target="_blank" rel="noopener">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="overview">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <div class="badge"><i class="fas fa-cubes"></i> Modular CLI workflow orchestration</div>
+            <h1 style="margin:14px 0 10px; color: var(--text); font-size: 2.2rem; line-height: 1.15;">
+              Reckoning
+              <span style="display:block; color: var(--text-muted); font-weight: 500; font-size: 1.2rem; margin-top: 6px;">
+                Orchestrator for offensive operations, reconnaissance, and monitoring
+              </span>
+            </h1>
+            <p class="muted" style="font-size: 1.05rem; max-width: 62ch;">
+              Reckoning helps you build repeatable workflows around command-line tools.
+              It was designed with Red Team, penetration testing, and threat intelligence in mind—while staying general enough
+              for any operation that benefits from structured, shareable execution.
+            </p>
+            <div class="d-flex gap-10 mt-20" style="flex-wrap: wrap;">
+              <a class="btn btn-primary" href="#install"><i class="fas fa-play"></i> Get started</a>
+              <a class="btn" href="#features"><i class="fas fa-list-check"></i> See capabilities</a>
+              <a class="btn" href="#workflows"><i class="fas fa-clock-rotate-left"></i> Execution modes</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 style="margin:0; color: var(--text);"><i class="fas fa-gauge-high"></i> At a glance</h3>
+            </div>
+            <div class="card-body">
+              <div class="kpi mb-15">
+                <i class="fas fa-square-check"></i>
+                <div>
+                  <div style="font-weight:600;">Workflow-first UI</div>
+                  <div class="muted">Create ordered tool chains and follow progress per execution.</div>
+                </div>
+              </div>
+              <div class="kpi mb-15">
+                <i class="fas fa-arrows-turn-right"></i>
+                <div>
+                  <div style="font-weight:600;">String substitution</div>
+                  <div class="muted">Pass inputs and outputs between tools using <code>{0}</code>, <code>{1}</code>, <code>{2}</code>…</div>
+                </div>
+              </div>
+              <div class="kpi">
+                <i class="fas fa-repeat"></i>
+                <div>
+                  <div style="font-weight:600;">Recurring and scheduled runs</div>
+                  <div class="muted">Run once, run continuously every <em>N</em> minutes, or run <em>N</em> times with intervals.</div>
+                </div>
+              </div>
+              <div class="alert alert-info mt-20" style="margin-bottom:0;">
+                <i class="fas fa-info-circle"></i>
+                Designed to reduce friction in repeatable operations—without forcing you into a single tooling ecosystem.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <h2>Core features</h2>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-screwdriver-wrench"></i> Tool registry</h3></div>
+            <div class="card-body">
+              <p class="muted" style="margin-top:0;">
+                Define tools by name, path, arguments, and update commands. Reckoning executes them consistently and captures results per step.
+              </p>
+              <ul class="list" style="margin:0; padding-left: 18px;">
+                <li>Store repeatable arguments</li>
+                <li>Update tooling via configured commands</li>
+                <li>Keep operations reproducible</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-book"></i> Wordlists and variables</h3></div>
+            <div class="card-body">
+              <p class="muted" style="margin-top:0;">
+                Map friendly names to paths (or values) and reference them in commands through simple substitution.
+              </p>
+              <ul class="list" style="margin:0; padding-left: 18px;">
+                <li>Short aliases for large paths</li>
+                <li>Use the same mechanism for API keys/tokens</li>
+                <li>Reduce manual typing and mistakes</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-layer-group"></i> Workflows</h3></div>
+            <div class="card-body">
+              <p class="muted" style="margin-top:0;">
+                Compose a sequence of tools, choose their order, and run the workflow with a single execution.
+              </p>
+              <ul class="list" style="margin:0; padding-left: 18px;">
+                <li>Visual organization (including colors)</li>
+                <li>Execution history</li>
+                <li>Operational consistency across runs</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning mt-20">
+          <i class="fas fa-triangle-exclamation"></i>
+          Reckoning is an orchestrator. It does not replace tooling choices; it standardizes how you chain and execute them.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workflows">
+      <div class="container">
+        <h2>Workflow execution modes</h2>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-flag-checkered"></i> Run once</h3></div>
+            <div class="card-body">
+              <p class="muted" style="margin:0;">
+                The default behavior: execute the workflow a single time and store the full run history.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-infinity"></i> Recurring</h3></div>
+            <div class="card-body">
+              <p class="muted" style="margin:0;">
+                Run continuously every <strong>N</strong> minutes. Useful for monitoring, recurring recon, and scheduled collection.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-stopwatch"></i> Run N times</h3></div>
+            <div class="card-body">
+              <p class="muted" style="margin:0;">
+                Execute a fixed number of runs with <strong>N</strong>-minute sleeps between each run.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-20">
+          <div class="card-header">
+            <h3 style="margin:0; color: var(--text);"><i class="fas fa-arrow-right-arrow-left"></i> Substitution model</h3>
+          </div>
+          <div class="card-body">
+            <p class="muted" style="margin-top:0;">
+              Reckoning uses a simple substitution model so that tools can consume each other’s outputs without custom glue code:
+            </p>
+            <div class="codeblock" aria-label="Example substitution">
+# {0} is the initial input (for example, a domain).
+# {1}, {2}, ... are outputs from earlier tools in the workflow.
+
+subfinder -d {0} -silent > {1}
+httpx -l {1} -silent > {2}
+nuclei -l {2} -severity medium,high,critical -jsonl > {3}
+            </div>
+            <p class="muted" style="margin: 12px 0 0;">
+              Wordlist aliases (and even API keys) can be referenced as <code>{name}</code>, resolving to the configured path/value.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="install">
+      <div class="container">
+        <h2>Install and run</h2>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-download"></i> 1) Clone</h3></div>
+            <div class="card-body">
+              <div class="codeblock">git clone https://github.com/rf-peixoto/reckoning</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-gear"></i> 2) Install</h3></div>
+            <div class="card-body">
+              <div class="codeblock">./install.sh</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 style="margin:0; color: var(--text);"><i class="fas fa-play"></i> 3) Start</h3></div>
+            <div class="card-body">
+              <div class="codeblock">./start.sh</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-success mt-20">
+          <i class="fas fa-circle-check"></i>
+          Open your browser at <strong>http://localhost:5000</strong> after starting the service.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="security">
+      <div class="container">
+        <h2>Security and responsible use</h2>
+        <div class="card">
+          <div class="card-body">
+            <p style="margin-top:0;">
+              Reckoning is intended for legitimate security work: authorized offensive testing, reconnaissance, monitoring, and threat intelligence.
+              Treat workflows as executable operational artifacts—review them carefully before sharing or running them in new environments.
+            </p>
+            <ul class="list" style="padding-left: 18px; margin-bottom: 0;">
+              <li>Prefer least-privilege execution environments for tooling.</li>
+              <li>Sanitize secrets (API keys/tokens) before exporting or publishing configurations.</li>
+              <li>Pin tool versions where reproducibility matters.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-20">
+          <i class="fas fa-people-group"></i>
+          Sponsored by <em>the-street.xyz</em>, a private forum for cybersecurity, threat intelligence, and cipherpunk culture.
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="card">
+          <div class="card-body d-flex justify-between align-center" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="margin:0 0 6px;">Ready to explore Reckoning?</h2>
+              <div class="muted">Browse the repository, read the docs, and start composing workflows.</div>
+            </div>
+            <div class="d-flex gap-10" style="flex-wrap: wrap;">
+              <a class="btn btn-primary" href="https://github.com/rf-peixoto/reckoning" target="_blank" rel="noopener">
+                <i class="fab fa-github"></i> View on GitHub
+              </a>
+              <a class="btn" href="#overview"><i class="fas fa-arrow-up"></i> Back to top</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="d-flex justify-between" style="flex-wrap: wrap; gap: 10px;">
+            <div>© <span id="year"></span> Reckoning. Static project page.</div>
+            <div>
+              <a class="nav-link" style="display:inline-flex;" href="https://github.com/rf-peixoto/reckoning/blob/master/LICENSE" target="_blank" rel="noopener"><i class="fas fa-scale-balanced"></i> License</a>
+              <a class="nav-link" style="display:inline-flex;" href="https://github.com/rf-peixoto/reckoning/blob/master/SECURITY.md" target="_blank" rel="noopener"><i class="fas fa-file-shield"></i> Security</a>
+              <a class="nav-link" style="display:inline-flex;" href="https://github.com/rf-peixoto/reckoning/blob/master/README.md" target="_blank" rel="noopener"><i class="fas fa-book-open"></i> Docs</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if (!el) return;
+        e.preventDefault();
+        el.scrollIntoView({behavior: 'smooth', block: 'start'});
+        history.pushState(null, '', id);
+      });
+    });
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
