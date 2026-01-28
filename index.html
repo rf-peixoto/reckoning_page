@@ -726,9 +726,9 @@
 # {0} is the initial input (for example, a domain).
 # {1}, {2}, ... are outputs from earlier tools in the workflow.
 
-subfinder -d {0} -silent > {1}
-httpx -l {1} -silent > {2}
-nuclei -l {2} -severity medium,high,critical -jsonl > {3}
+subfinder -d {0} -silent
+httpx -l {1} -silent
+nuclei -l {2} -severity medium,high,critical -jsonl
             </div>
             <p class="muted" style="margin: 12px 0 0;">
               Wordlist aliases (and even API keys) can be referenced as <code>{name}</code>, resolving to the configured path/value.
